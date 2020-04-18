@@ -18,13 +18,18 @@ def scanline_convert(polygons, i, screen, zbuffer):
 
     xb = sortedPoints[0][0]
     yb = sortedPoints[0][1]
+    zb = sortedPoints[0][1]
     xm = sortedPoints[1][0]
     ym = sortedPoints[1][1]
+    zm = sortedPoints[1][1]
     xt = sortedPoints[2][0]
     yt = sortedPoints[2][1]
+    zbt= sortedPoints[2][1]
 
     x0 = xb
     x1 = xb
+    z0 = zb
+    z1 = zb
     y0 = yb
 
     dx0 = (xt - xb) / (yt-yb+1)
