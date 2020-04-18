@@ -348,7 +348,7 @@ def draw_line( x0, y0, z0, x1, y1, z1, screen, zbuffer, color ):
             d = A - B/2
             dy_northeast = -1
             d_northeast = A - B
-        pixCount = abs(x1-x0)
+        pixCount = abs(x1-x0)+1
 
     else: #octants 2/7
         tall = True
@@ -368,10 +368,8 @@ def draw_line( x0, y0, z0, x1, y1, z1, screen, zbuffer, color ):
             d_east = -1 * B
             loop_start = y1
             loop_end = y
-        pixCount = abs(y1 - y0)
-    if pixCount == 0:
-        plot( screen, zbuffer, color, x0, y0, z0)
-        return;
+        pixCount = abs(y1 - y0)+1
+
     dz = (z1-z0)/pixCount
     while ( loop_start < loop_end ):
         plot( screen, zbuffer, color, x, y, z )
