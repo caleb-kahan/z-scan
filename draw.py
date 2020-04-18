@@ -1,11 +1,15 @@
 from display import *
 from matrix import *
 from gmath import *
-
-def scanline_convert(polygons, i, screen, zbuffer, color):
+import random as rand
+def scanline_convert(polygons, i, screen, zbuffer):
     if len(polygons) < 2:
         print('Need at least 3 points to draw')
         return
+    a = rand.randint(0,255)
+    b = rand.randint(0,255)
+    c = rand.randint(0,255)
+    color = [a,b,c]
     point1 = polygons[i][:3]
     point2 = polygons[i+1][:3]
     point3 = polygons[i+2][:3]
@@ -27,19 +31,20 @@ def scanline_convert(polygons, i, screen, zbuffer, color):
     dx1 = (xm - xb) / (ym - yb +1)
     dx1_1 = (xt - xm) / (yt - ym +1)
 
+    count = 0
     if yb == ym:
         dx1 = dx1_1
         x1 = xm
+        count+=1
     while y0 <= yt:
-        #draw_scanline(x0, 0 , x1, 0, y0, screen, zbuffer, color)
         draw_line(int(x0), int(y0), 0, int(x1), int(y0), 0, screen, zbuffer, color)
         x0+=dx0
         x1+=dx1
         y0+=1
-        if y0 == ym:
+        if y0 >= ym and not count:
             dx1 = dx1_1
             x1 = xm
-
+            count+=1
 
 def add_polygon( polygons, x0, y0, z0, x1, y1, z1, x2, y2, z2 ):
     add_point(polygons, x0, y0, z0)
@@ -57,7 +62,7 @@ def draw_polygons( polygons, screen, zbuffer, color ):
         normal = calculate_normal(polygons, point)[:]
         #print normal
         if normal[2] > 0:
-            scanline_convert(polygons,point,screen,zbuffer,color)
+            scanline_convert(polygons,point,screen,zbuffer)
         point+= 3
 
 
