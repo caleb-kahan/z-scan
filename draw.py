@@ -18,13 +18,13 @@ def scanline_convert(polygons, i, screen, zbuffer):
 
     xb = sortedPoints[0][0]
     yb = sortedPoints[0][1]
-    zb = sortedPoints[0][1]
+    zb = sortedPoints[0][2]
     xm = sortedPoints[1][0]
     ym = sortedPoints[1][1]
-    zm = sortedPoints[1][1]
+    zm = sortedPoints[1][2]
     xt = sortedPoints[2][0]
     yt = sortedPoints[2][1]
-    zbt= sortedPoints[2][1]
+    zt= sortedPoints[2][2]
 
     x0 = xb
     x1 = xb
@@ -33,21 +33,37 @@ def scanline_convert(polygons, i, screen, zbuffer):
     y0 = yb
 
     dx0 = (xt - xb) / (yt-yb+1)
-    dx1 = (xm - xb) / (ym - yb +1)
-    dx1_1 = (xt - xm) / (yt - ym +1)
+    dz0 = (zt - zb) / (yt-yb+1)
+    try:
+        dx1 = (xm - xb) / (ym - yb+1)
+        dz1 = (zm - zb) / (ym - yb+1)
+    except ZeroDivisionError:
+        dx1 = 0
+        dz1 = 0
+    try:
+        dx1_1 = (xt - xm) / (yt - ym+1)
+        dz1_1 = (zt - zm) / (yt - ym+1)
+    except ZeroDivisionError:
+        dx1_1 = 0
+        dz1_1 = 0
 
     count = 0
     if yb == ym:
         dx1 = dx1_1
+        dz1 = dz1_1
         x1 = xm
+        z1 = zm
         count+=1
     while y0 <= yt:
-        draw_line(int(x0), int(y0), 0, int(x1), int(y0), 0, screen, zbuffer, color)
+        draw_line(int(x0), int(y0), z0, int(x1), int(y0), z1, screen, zbuffer, color)
         x0+=dx0
         x1+=dx1
+        z0+=dz0
+        z1+=dz1
         y0+=1
         if y0 >= ym and not count:
             dx1 = dx1_1
+            dz1 = dz1_1
             x1 = xm
             count+=1
 
@@ -281,10 +297,15 @@ def draw_scanline( x0, z0, x1, z1, y, screen, zbuffer, color ):
         xt = x0
         x0 = x1
         x1 = xt
+        zt = z0
+        z0 = z1
+        z1 = zt
     x = x0
-
+    z = z0
+    dz = (z1-z0)/(x1-x0)
     while ( x < x1 ):
-        plot( screen, zbuffer, color, int(x), int(y), 0 )
+        plot( screen, zbuffer, color, int(x), int(y), z)
+        z+=dz
         x+=1
 
     plot( screen, zbuffer, color, int(x), int(y), 0 )
@@ -295,13 +316,18 @@ def draw_line( x0, y0, z0, x1, y1, z1, screen, zbuffer, color ):
     if x0 > x1:
         xt = x0
         yt = y0
+        zt = z0
         x0 = x1
         y0 = y1
+        z0 = z1
         x1 = xt
         y1 = yt
+        z1 = zt
 
     x = x0
     y = y0
+    z = z0
+
     A = 2 * (y1 - y0)
     B = -2 * (x1 - x0)
     wide = False
@@ -322,6 +348,7 @@ def draw_line( x0, y0, z0, x1, y1, z1, screen, zbuffer, color ):
             d = A - B/2
             dy_northeast = -1
             d_northeast = A - B
+        pixCount = abs(x1-x0)
 
     else: #octants 2/7
         tall = True
@@ -341,9 +368,13 @@ def draw_line( x0, y0, z0, x1, y1, z1, screen, zbuffer, color ):
             d_east = -1 * B
             loop_start = y1
             loop_end = y
-
+        pixCount = abs(y1 - y0)
+    if pixCount == 0:
+        plot( screen, zbuffer, color, x0, y0, z0)
+        return;
+    dz = (z1-z0)/pixCount
     while ( loop_start < loop_end ):
-        plot( screen, zbuffer, color, x, y, 0 )
+        plot( screen, zbuffer, color, x, y, z )
         if ( (wide and ((A > 0 and d > 0) or (A < 0 and d < 0))) or
              (tall and ((A > 0 and d < 0) or (A < 0 and d > 0 )))):
 
@@ -354,5 +385,6 @@ def draw_line( x0, y0, z0, x1, y1, z1, screen, zbuffer, color ):
             x+= dx_east
             y+= dy_east
             d+= d_east
+        z+=dz
         loop_start+= 1
-    plot( screen, zbuffer, color, x, y, 0 )
+    plot( screen, zbuffer, color, x, y, z )
