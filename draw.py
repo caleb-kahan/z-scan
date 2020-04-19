@@ -6,10 +6,26 @@ def scanline_convert(polygons, i, screen, zbuffer):
     if len(polygons) < 2:
         print('Need at least 3 points to draw')
         return
-    a = rand.randint(0,255)
-    b = rand.randint(0,255)
-    c = rand.randint(0,255)
-    color = [a,b,c]
+    color = 150+rand.randint(0,75),rand.randint(0,255),rand.randint(0,255)
+    '''
+    #if i%100 == 2:
+        #print(len(polygons))
+    if len(polygons) == 2280:
+        if i%12==0 or i%12 == 6:
+            color = [207,181,59]
+        else:
+            color = [0,0,0]
+    elif len(polygons) == 36:
+        if i%12==3 or i%12 == 9:
+            color = [255,0,255]
+        else:
+            color = [0,0,0]
+    #elif i%8==0 or i%8 == 3:
+    elif i%7<2:
+        color = [207,181,59]
+    else:
+        color = [0,0,0]
+    '''
     point1 = polygons[i][:3]
     point2 = polygons[i+1][:3]
     point3 = polygons[i+2][:3]
@@ -32,17 +48,17 @@ def scanline_convert(polygons, i, screen, zbuffer):
     z1 = zb
     y0 = yb
 
-    dx0 = (xt - xb) / (yt-yb+1)
-    dz0 = (zt - zb) / (yt-yb+1)
+    dx0 = (xt - xb) / (yt-yb)
+    dz0 = (zt - zb) / (yt-yb)
     try:
-        dx1 = (xm - xb) / (ym - yb+1)
-        dz1 = (zm - zb) / (ym - yb+1)
+        dx1 = (xm - xb) / (ym - yb)
+        dz1 = (zm - zb) / (ym - yb)
     except ZeroDivisionError:
         dx1 = 0
         dz1 = 0
     try:
-        dx1_1 = (xt - xm) / (yt - ym+1)
-        dz1_1 = (zt - zm) / (yt - ym+1)
+        dx1_1 = (xt - xm) / (yt - ym)
+        dz1_1 = (zt - zm) / (yt - ym)
     except ZeroDivisionError:
         dx1_1 = 0
         dz1_1 = 0
@@ -55,7 +71,7 @@ def scanline_convert(polygons, i, screen, zbuffer):
         z1 = zm
         count+=1
     while y0 <= yt:
-        draw_line(int(x0), int(y0), z0, int(x1), int(y0), z1, screen, zbuffer, color)
+        draw_scanline(int(x0), z0, int(x1), z1, int(y0),screen, zbuffer, color)
         x0+=dx0
         x1+=dx1
         z0+=dz0
@@ -302,14 +318,12 @@ def draw_scanline( x0, z0, x1, z1, y, screen, zbuffer, color ):
         z1 = zt
     x = x0
     z = z0
-    dz = (z1-z0)/(x1-x0)
+    dz = (z1-z0)/(x1-x0+1)
     while ( x < x1 ):
         plot( screen, zbuffer, color, int(x), int(y), z)
         z+=dz
         x+=1
-
-    plot( screen, zbuffer, color, int(x), int(y), 0 )
-
+    plot( screen, zbuffer, color, int(x), int(y), z)
 def draw_line( x0, y0, z0, x1, y1, z1, screen, zbuffer, color ):
 
     #swap points if going right -> left

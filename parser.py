@@ -23,13 +23,13 @@ The file follows the following format:
 
          sphere: add a sphere to the POLYGON matrix -
                  takes 4 arguemnts (cx, cy, cz, r)
-         torus: add a torus to the POLYGON matrix - 
+         torus: add a torus to the POLYGON matrix -
                 takes 5 arguemnts (cx, cy, cz, r1, r2)
-         box: add a rectangular prism to the POLYGON matrix - 
-              takes 6 arguemnts (x, y, z, width, height, depth)	    
+         box: add a rectangular prism to the POLYGON matrix -
+              takes 6 arguemnts (x, y, z, width, height, depth)
          clear: clears the edge and POLYGON matrices
 
-	 circle: add a circle to the edge matrix - 
+	 circle: add a circle to the edge matrix -
 	         takes 4 arguments (cx, cy, cz, r)
 	 hermite: add a hermite curve to the edge matrix -
 	          takes 8 arguments (x0, y0, x1, y1, rx0, ry0, rx1, ry1)
@@ -59,7 +59,7 @@ The file follows the following format:
 
 See the file script for an example of the file format
 """
-ARG_COMMANDS = [ 'box', 'sphere', 'torus', 'circle', 'bezier', 'hermite', 'line', 'scale', 'move', 'rotate', 'save' ]
+ARG_COMMANDS = [ 'box', 'sphere', 'torus', 'circle', 'bezier', 'hermite', 'line', 'scale', 'move', 'rotate', 'save', 'wall' ]
 
 def parse_file( fname, edges, polygons, csystems, screen, zbuffer, color ):
 
@@ -109,6 +109,32 @@ def parse_file( fname, edges, polygons, csystems, screen, zbuffer, color ):
             add_box(polygons,
                     float(args[0]), float(args[1]), float(args[2]),
                     float(args[3]), float(args[4]), float(args[5]))
+            matrix_mult(csystems[-1], polygons)
+            draw_polygons(polygons, screen, zbuffer, color)
+            polygons = []
+        elif line == 'wall':
+            initialX = float(args[0])
+            initialY = float(args[1])
+            initialZ = float(args[2])
+            x = initialX
+            y = initialY
+            z = initialZ
+            totalWidth = float(args[3])
+            totalHeight = float(args[4])
+            totalDepth = float(args[5])
+            #Arbitrary choice- wall will contain 10X10 boxes
+            while x<initialX+totalWidth:
+                y = initialY
+                while y>initialY-totalHeight:
+                    z = initialZ
+                    while z> initialZ - totalDepth:
+                        add_box(polygons,
+                        x, y, z,
+                        10, 10, 10)
+                        z-=10
+                    y-=10
+                x+=10
+
             matrix_mult(csystems[-1], polygons)
             draw_polygons(polygons, screen, zbuffer, color)
             polygons = []
